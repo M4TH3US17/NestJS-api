@@ -11,7 +11,7 @@ export class Product {
     validUntil: Date;
 
     constructor() {}
-
+    
     setProductId(productId: number): Product {
         this.productId = productId;
         return this;

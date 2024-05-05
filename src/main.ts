@@ -11,6 +11,6 @@ async function bootstrap() {
   /*app.use(json({ limit: '450mb' }));
   app.use(urlencoded({ extended: true, limit: '450mb' }));*/
 
-  await app.listen(port, host, () => console.log(`Servindo em : ${host}: ${port}`));
+  await app.listen(port, () => console.log(`SERVER PORT: ${port}`));
 }
 bootstrap();
