@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ProductDTO } from "src/application/dto/product/product.dto";
 import { Product } from "src/domain/entities/product/product.entity";
 import { ProductRequest } from "src/infrastructure/request/product/product.request";
+import { Utils } from "../utils";
 
 @Injectable()
 export class ProductUtils {
@@ -25,8 +26,8 @@ export class ProductUtils {
     static parseRequestToEntity(data: ProductRequest): Product {
         this.log('ProductUtils :: convertendo request para entidade...');
     
-        if (!data.name || !data.price || !data.description || !data.validUntil) {
-            this.warn('ProductUtils :: Request esta invalido, pois algum campo obrigatorio esta vazio/nulo!');
+        if (Utils.isBlank(data.name) || this.isInvalidPrice(data.price) || Utils.isBlank(data.description) || Utils.isInvalidDate(data.validUntil)) {
+            this.warn('ProductUtils :: Request esta invalido, revise os dados fornecidos!');
             return null;
         };
     
@@ -36,13 +37,14 @@ export class ProductUtils {
             data.name,
             data.price,
             data.description,
-            null,
+            new Date(),
             new Date(data.validUntil)
         );
     };
 
+    private static isInvalidPrice = (price: number): boolean => (price === 0 || price === null || price === undefined);
 
-    static log = (str: string) => new Logger(ProductUtils.name).log(str);
+    private static log = (str: string) => new Logger(ProductUtils.name).log(str);
     //static error = (str: string) => new Logger(ProductUtils.name).error(str);
-    static warn = (str: string) => new Logger(ProductUtils.name).warn(str);
+    private static warn = (str: string) => new Logger(ProductUtils.name).warn(str);
 };
