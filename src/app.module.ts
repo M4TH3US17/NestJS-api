@@ -11,7 +11,7 @@ import { Product } from './domain/entities/product/product.entity';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'admin',
+      password: 'admin123',
       database: 'nestJS-estudo',
       entities: [Product],
       synchronize: true,
