@@ -7,9 +7,6 @@ async function bootstrap() {
 
   const host = process.env.API_HOST;
   const port = process.env.API_PORT || 3000;
-  
-  /*app.use(json({ limit: '450mb' }));
-  app.use(urlencoded({ extended: true, limit: '450mb' }));*/
 
   await app.listen(port, () => console.log(`SERVER PORT: ${port}`));
 }

@@ -1,80 +1,50 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { Product } from "src/domain/entities/product/product.entity";
 import { ProductResponse } from "src/infrastructure/response/product/product.response";
 import { ProductUtils } from "src/utils/product/utils.product";
+import { Repository } from "typeorm";
+import { FindOneOptions } from 'typeorm';
 
 @Injectable()
 export class ProductService {
+    constructor(@InjectRepository(Product) private readonly repository: Repository<Product>) {}
 
-    repository = this.returnListOfProject();
-
-    getAllProducts(): ProductResponse {
-        this.log(`ProductService :: Iniciando consulta na base de dados...`);
-        let data = this.repository;
-        let listOfDTO = ProductUtils.parseListToDTO(data);
-
-        this.log(`ProductService :: Enviando dados para o front...`);
-        return new ProductResponse(200, 'segue a lista de produtos!', listOfDTO);
-    };
-
-    getProductByID(id: number): ProductResponse {
+    public async findAll(): Promise<ProductResponse> {
         try {
-            this.log(`ProductService :: Iniciando a busca do produto de ID ${id} na base de dados...`);
-            let data = this.repository.find(product => product.productId === id);
-            console.log(data)
-            let dto = ProductUtils.parseToDTO(data);
-    
+            this.log(`ProductService :: Iniciando consulta na base de dados...`);
+            const data = await this.repository.find();
+            const listOfDTO = ProductUtils.parseListToDTO(data);
             this.log(`ProductService :: Enviando dados para o front...`);
-            return new ProductResponse(200, `Produto de ID ${id} localizado com sucesso!`, dto);
+            return new ProductResponse(200, 'Segue a lista de produtos!', listOfDTO);
         } catch(error) {
-            this.warn(`ProductService :: ${error}`);
-            return new ProductResponse(500, `Houve um erro do lado do servidor!`, []);
+            this.error(`ProductService :: Erro ao buscar produtos: ${error}`);
+            return new ProductResponse(500, 'Houve um erro ao buscar produtos!', []);
         }
-    };
-
-    // METODOS AUXILIARES
-    log = (str: string) => new Logger(ProductService.name).log(str);
-    warn = (str: string) => new Logger(ProductService.name).error(str);
-
-    // DADOS MOCKADOS PRA TESTAR
-    returnListOfProject(): Product[] {
-        return [
-            new Product()
-            .setProductId(1)
-            .setName('Product 1')
-            .setPrice(10.99)
-            .setDescription('Description for Product 1')
-            .setCreationDate(new Date())
-            .setValidUntil(new Date()), 
-            new Product()
-            .setProductId(1)
-            .setName('Product 1')
-            .setPrice(10.99)
-            .setDescription('Description for Product 1')
-            .setCreationDate(new Date())
-            .setValidUntil(new Date()),
-            new Product()
-            .setProductId(1)
-            .setName('Product 1')
-            .setPrice(10.99)
-            .setDescription('Description for Product 1')
-            .setCreationDate(new Date())
-            .setValidUntil(new Date()),
-            new Product()
-            .setProductId(1)
-            .setName('Product 1')
-            .setPrice(10.99)
-            .setDescription('Description for Product 1')
-            .setCreationDate(new Date())
-            .setValidUntil(new Date()),
-            new Product()
-            .setProductId(1)
-            .setName('Product 1')
-            .setPrice(10.99)
-            .setDescription('Description for Product 1')
-            .setCreationDate(new Date())
-            .setValidUntil(new Date()),
-        ];
     }
 
-};
+    public async findById(productId: number): Promise<ProductResponse> {
+        try {
+            this.log(`ProductService :: Iniciando a busca do produto de ID ${productId} na base de dados...`);
+            const options: FindOneOptions = { where: { productId } };
+            const data = await this.repository.findOne(options);
+
+            if (!data) {
+                this.warn(`Produto de ID ${productId} não encontrado!`);
+                return new ProductResponse(404, `Produto de ID ${productId} não encontrado!`, []);
+            };
+        
+            const dto = ProductUtils.parseToDTO(data);
+            this.log(`ProductService :: Enviando dados para o front...`);
+            return new ProductResponse(200, `Produto de ID ${productId} localizado com sucesso!`, dto);
+        } catch(error) {
+            this.error(`ProductService :: Erro ao buscar produto por ID ${productId}: ${error}`);
+            return new ProductResponse(500, `Houve um erro ao buscar produto por ID ${productId}!`, []);
+        }
+    }
+
+    // Métodos auxiliares (LOG)
+    log   = (str: string) => new Logger(ProductService.name).log(str);
+    warn  = (str: string) => new Logger(ProductService.name).warn(str);
+    error = (str: string) => new Logger(ProductService.name).error(str);
+}
