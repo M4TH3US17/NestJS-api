@@ -37,4 +37,5 @@ export class Product {
         this.creationDate = creationDate;
         this.validUntil = validUntil;
     }
+    
 }
